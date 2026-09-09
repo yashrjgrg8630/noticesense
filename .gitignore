@@ -2,6 +2,8 @@
 venv/
 env/
 .env
+.env.local
+.env.*.local
 .venv
 
 # Python
@@ -13,6 +15,15 @@ __pycache__/
 *.egg-info/
 .installed.cfg
 *.egg
+.pytest_cache/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+npm-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
 
 # Specific to project
 data/uploads/*
@@ -24,5 +35,7 @@ data/uploads/*
 *.swp
 
 # Other
-*.pdf
 .poppler/
+
+# Vercel
+.vercel

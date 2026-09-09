@@ -1,0 +1,1 @@
+"""NoticeSense backend application package."""

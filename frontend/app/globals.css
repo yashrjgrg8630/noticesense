@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --radius: 0.625rem;
+
+  /* Light theme */
+  --background: #f7f8f9;
+  --foreground: #16191d;
+  --card: #ffffff;
+  --card-foreground: #16191d;
+  --muted: #eceef0;
+  --muted-foreground: #5c646d;
+  --border: #dfe3e6;
+  --input: #dfe3e6;
+  --ring: #0e8f8a;
+
+  --primary: #0e8f8a;
+  --primary-foreground: #ffffff;
+  --accent: #e6f4f3;
+  --accent-foreground: #0b6b67;
+
+  --success: #1f8f4e;
+  --warning: #c07d15;
+  --danger: #c23b3b;
+}
+
+.dark {
+  --background: #0d1117;
+  --foreground: #e6edf3;
+  --card: #161b22;
+  --card-foreground: #e6edf3;
+  --muted: #1c232c;
+  --muted-foreground: #8b949e;
+  --border: #2a323c;
+  --input: #2a323c;
+  --ring: #2dd4bf;
+
+  --primary: #2dd4bf;
+  --primary-foreground: #05201d;
+  --accent: #16302d;
+  --accent-foreground: #7fe9dc;
+
+  --success: #3fb950;
+  --warning: #d29922;
+  --danger: #f85149;
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  background-color: var(--background);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Thin, unobtrusive scrollbars for the document and chat panes. */
+.scroll-slim::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scroll-slim::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  border-radius: 9999px;
+}
+.scroll-slim::-webkit-scrollbar-track {
+  background-color: transparent;
+}

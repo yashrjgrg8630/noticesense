@@ -1,0 +1,106 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-noticesense}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-noticesense}
+      POSTGRES_DB: ${POSTGRES_DB:-noticesense}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-noticesense}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://noticesense:noticesense@db:5432/noticesense}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      UPLOAD_DIR: /data/uploads
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
+    volumes:
+      - uploads_data:/data/uploads
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    # Run migrations, then launch the API. The worker shares the same image.
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000"
+
+  worker:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://noticesense:noticesense@db:5432/noticesense}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      UPLOAD_DIR: /data/uploads
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
+    volumes:
+      - uploads_data:/data/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["celery", "-A", "app.tasks.celery_app.celery", "worker", "--loglevel=info", "--concurrency=2"]
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-/api}
+    restart: unless-stopped
+    environment:
+      # The Next.js server proxies /api to the API service inside the compose network.
+      API_INTERNAL_URL: ${API_INTERNAL_URL:-http://api:8000}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+  # Optional local Ollama. Enable with: docker compose --profile ollama up
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["ollama"]
+    restart: unless-stopped
+    volumes:
+      - ollama_models:/root/.ollama
+    ports:
+      - "11434:11434"
+
+volumes:
+  db_data:
+  redis_data:
+  uploads_data:
+  ollama_models:
