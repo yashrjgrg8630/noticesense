@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NoticeSense – Agentic AI for Official Notices</title>
+  <meta name="description" content="Upload any official notice and get instant AI-powered summaries, deadline extraction, and action steps." />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+<!-- ── Top Navbar ─────────────────────────────────────────────────────────── -->
+<nav class="topnav">
+  <a class="nav-logo" href="#" onclick="navigate('home');return false;" style="font-size:22px">NoticeSense</a>
+  <div class="nav-links">
+    <button class="nav-btn active" id="nav-home"      onclick="navigate('home')">Home</button>
+    <button class="nav-btn"        id="nav-dashboard" onclick="navigate('dashboard')">Dashboard</button>
+    <button class="nav-btn"        id="nav-chat"      onclick="navigate('chat')">Chat</button>
+    <button class="nav-btn"        id="nav-about"     onclick="navigate('about')">About</button>
+  </div>
+  <div class="nav-status">
+    <span><span class="dot" id="dot-notice"></span>Notice</span>
+    <span><span class="dot" id="dot-analysis"></span>Analysis</span>
+    <button class="btn btn-secondary" style="padding:5px 14px;font-size:12px;margin-left:8px" onclick="clearSession()">⟳ Clear</button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     HOME PAGE
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="page active" id="page-home">
+  <div class="card purple" style="padding:20px 24px;margin-bottom:8px">
+    <div class="card-label">Upload Document</div>
+    <div style="color:#64748b;font-size:13px">Supports PDF, PNG, JPG, JPEG</div>
+  </div>
+
+  <div class="upload-zone" id="upload-zone">
+    <input type="file" id="file-input" accept=".pdf,.png,.jpg,.jpeg" />
+    <div class="upload-icon">📂</div>
+    <div class="upload-title">Drop your notice here or click to browse</div>
+    <div class="upload-sub">PDF, PNG, JPG, JPEG supported</div>
+  </div>
+
+  <div class="file-info" id="file-info">
+    <span id="file-name"></span>
+  </div>
+
+  <button class="btn btn-primary" id="btn-analyse" disabled>🚀 Extract &amp; Analyse</button>
+
+  <div class="progress-box" id="progress-box">
+    <div class="progress-step" id="step-ocr">
+      <span class="step-indicator">○</span> Running OCR extraction…
+    </div>
+    <div class="progress-step" id="step-parse">
+      <span class="step-indicator">○</span> Cleaning and parsing text…
+    </div>
+    <div class="progress-step" id="step-agents">
+      <span class="step-indicator">○</span> Running AI agents…
+    </div>
+  </div>
+
+  <div id="result-box" style="display:none"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     DASHBOARD PAGE
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-dashboard">
+  <div class="page-header">
+    <h1>Notice Dashboard</h1>
+    <p>AI-extracted insights from your uploaded notice.</p>
+  </div>
+  <div id="dashboard-content">
+    <div class="empty">
+      <div class="empty-icon">📊</div>
+      <div class="empty-title">No analysis yet</div>
+      <div class="empty-sub">Upload a notice from the Home page first.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     CHAT PAGE
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-chat">
+  <div class="page-header">
+    <h1>Chat with Your Notice</h1>
+    <p>Ask anything — the AI answers based only on the uploaded notice.</p>
+  </div>
+
+  <div class="empty" id="chat-empty" style="display:none">
+    <div class="empty-icon">💬</div>
+    <div class="empty-title">No notice loaded</div>
+    <div class="empty-sub">Upload and analyse a notice from the Home page first.</div>
+  </div>
+
+  <div id="chat-main" style="display:flex;flex-direction:column">
+    <div class="chip-row" id="chat-page">
+      <span class="chip">What is the main purpose of this notice?</span>
+      <span class="chip">What are the key deadlines?</span>
+      <span class="chip">What actions should I take?</span>
+      <span class="chip">Who issued this notice?</span>
+    </div>
+
+    <div class="chat-wrap">
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="chat-input-row">
+        <textarea class="chat-input" id="chat-input" rows="1" placeholder="Type your question about the notice…"></textarea>
+        <button class="chat-send" id="chat-send">➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     ABOUT PAGE
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-about">
+  <div class="page-header">
+    <h1>About NoticeSense</h1>
+    <p>AI-powered platform for understanding official notices instantly.</p>
+  </div>
+
+  <div class="card purple" style="padding:24px 28px">
+    <div class="card-label">What is NoticeSense?</div>
+    <div class="card-value" style="margin-top:10px">
+      NoticeSense is an intelligent document analysis platform that uses <b>Agentic AI</b> and
+      <b>OCR technology</b> to instantly break down official notices — legal, regulatory, tax,
+      compliance, and more — into clear summaries, deadlines, and actionable steps.<br><br>
+      Instead of spending hours reading dense regulatory language, NoticeSense gives you
+      the key information in seconds.
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section-title purple">⚙️ How It Works</div>
+  <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:4px">
+    <div class="step"><div class="step-num">1</div><div class="step-text"><b style="color:#c4b5fd">Upload</b> — Drop in any PDF or image of an official notice</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-text"><b style="color:#c4b5fd">OCR</b> — Tesseract extracts and cleans the full text</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-text"><b style="color:#c4b5fd">Parse</b> — Structured fields (issuer, date, reference) are identified</div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-text"><b style="color:#c4b5fd">AI Agents</b> — Three specialised agents analyse the notice in parallel</div></div>
+    <div class="step"><div class="step-num">5</div><div class="step-text"><b style="color:#c4b5fd">Dashboard</b> — Results rendered as clear cards — summary, deadlines, actions</div></div>
+    <div class="step"><div class="step-num">6</div><div class="step-text"><b style="color:#c4b5fd">Chat</b> — Ask follow-up questions grounded in the actual notice</div></div>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section-title purple">🧠 The Three AI Agents</div>
+  <div class="agents-grid">
+    <div class="card" style="border-top:4px solid #7c6af7">
+      <div style="font-size:22px;margin-bottom:8px">📌</div>
+      <div style="font-weight:700;color:#e2e8f0;margin-bottom:10px">Intent Agent</div>
+      <ul style="margin:0;padding-left:18px;color:#94a3b8;font-size:13px;line-height:2">
+        <li>Identifies notice type</li>
+        <li>Generates plain-language summary</li>
+        <li>Classifies issuer and recipient</li>
+      </ul>
+    </div>
+    <div class="card" style="border-top:4px solid #f97316">
+      <div style="font-size:22px;margin-bottom:8px">⏳</div>
+      <div style="font-weight:700;color:#e2e8f0;margin-bottom:10px">Deadline Agent</div>
+      <ul style="margin:0;padding-left:18px;color:#94a3b8;font-size:13px;line-height:2">
+        <li>Extracts all key dates</li>
+        <li>Detects compliance deadlines</li>
+        <li>Calculates days remaining</li>
+      </ul>
+    </div>
+    <div class="card" style="border-top:4px solid #22c55e">
+      <div style="font-size:22px;margin-bottom:8px">✅</div>
+      <div style="font-weight:700;color:#e2e8f0;margin-bottom:10px">Action Agent</div>
+      <ul style="margin:0;padding-left:18px;color:#94a3b8;font-size:13px;line-height:2">
+        <li>Converts notice to action steps</li>
+        <li>Prioritises by urgency</li>
+        <li>Written in plain language</li>
+      </ul>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section-title purple">🛡️ AI Guardrails</div>
+  <div class="card blue">
+    <div class="card-value"><ul style="margin:0;padding-left:20px;line-height:2.2">
+      <li>Agents only use information explicitly present in the notice</li>
+      <li>Deadlines are never invented — only extracted from the text</li>
+      <li>No legal advice is provided — users are guided to seek professional help</li>
+      <li>If information is missing, agents clearly state so</li>
+    </ul></div>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section-title purple">🔭 Roadmap</div>
+  <div class="roadmap-row"><div class="roadmap-icon">🔍</div><div><div class="roadmap-title">RAG Support</div><div class="roadmap-desc">Query across multiple notices using vector databases</div></div></div>
+  <div class="roadmap-row"><div class="roadmap-icon">🗄️</div><div><div class="roadmap-title">Persistent Storage</div><div class="roadmap-desc">PostgreSQL backend for notice history and audit trail</div></div></div>
+  <div class="roadmap-row"><div class="roadmap-icon">🔔</div><div><div class="roadmap-title">Deadline Reminders</div><div class="roadmap-desc">Automated email/SMS alerts before critical dates</div></div></div>
+  <div class="roadmap-row"><div class="roadmap-icon">👥</div><div><div class="roadmap-title">Multi-user Access</div><div class="roadmap-desc">Team workspaces, role-based permissions</div></div></div>
+</div>
+
+<script src="/static/js/app.js"></script>
+<script>
+function clearSession() {
+  sessionStorage.clear();
+  SESSION_ID   = null;
+  SESSION_DATA = null;
+  chatHistory  = [];
+  updateStatus();
+  navigate('home');
+  document.getElementById('result-box').style.display = 'none';
+  document.getElementById('progress-box').style.display = 'none';
+  document.getElementById('file-info').style.display = 'none';
+  document.getElementById('btn-analyse').disabled = true;
+}
+</script>
+</body>
+</html>

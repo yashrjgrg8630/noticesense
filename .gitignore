@@ -1,0 +1,28 @@
+# Environments
+venv/
+env/
+.env
+.venv
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Specific to project
+data/uploads/*
+!data/uploads/.gitkeep
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+
+# Other
+*.pdf
+.poppler/
