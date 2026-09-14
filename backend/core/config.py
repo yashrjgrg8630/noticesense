@@ -7,6 +7,17 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(_
 # .env is at the project root – use absolute path so it always resolves correctly
 _ENV_FILE = os.path.join(PROJECT_ROOT, ".env")
 
+_DEFAULT_TESSERACT_CMD = (
+    r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    if os.name == "nt"
+    else "/usr/bin/tesseract"
+)
+_DEFAULT_POPPLER_PATH = (
+    os.path.join(PROJECT_ROOT, ".poppler", "poppler-24.08.0", "Library", "bin")
+    if os.name == "nt"
+    else ""
+)
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=_ENV_FILE,
@@ -26,9 +37,15 @@ class Settings(BaseSettings):
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     OLLAMA_MODEL: str = "gemma3:4b"
 
+    # Comma-separated browser origins allowed to call the API.
+    CORS_ALLOWED_ORIGINS: str = (
+        "http://localhost:8000,http://localhost:8501,"
+        "http://localhost:3000,http://localhost:5173"
+    )
+
     # Path configurations
-    TESSERACT_CMD: str = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-    POPPLER_PATH: str = os.path.join(PROJECT_ROOT, ".poppler", "poppler-24.08.0", "Library", "bin")
+    TESSERACT_CMD: str = _DEFAULT_TESSERACT_CMD
+    POPPLER_PATH: str = _DEFAULT_POPPLER_PATH
 
     # Storage
     UPLOAD_DIR: str = "data/uploads"

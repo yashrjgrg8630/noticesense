@@ -3,7 +3,7 @@ backend/api/app.py – NoticeSense FastAPI Entry Point
 Serves the HTML/JS frontend as static files and exposes /api/* REST endpoints.
 """
 
-import sys, os
+import sys
 from pathlib import Path
 
 # Ensure project root is importable
@@ -17,12 +17,19 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from backend.api.routes.upload import router as upload_router
 from backend.api.routes.chat   import router as chat_router
+from backend.core.config import settings
 
 app = FastAPI(title="NoticeSense API", version="0.3.0")
 
+allowed_origins = [
+    origin.strip()
+    for origin in settings.CORS_ALLOWED_ORIGINS.split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -35,13 +42,13 @@ app.include_router(chat_router,   prefix="/api")
 STATIC_DIR = PROJECT_ROOT / "static"
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
+@app.get("/health")
+async def health():
+    return {"status": "ok", "service": "NoticeSense API"}
+
 @app.get("/", include_in_schema=False)
 @app.get("/{full_path:path}", include_in_schema=False)
 async def serve_spa(full_path: str = ""):
     """Serve the SPA index.html for all non-API routes."""
     index = STATIC_DIR / "index.html"
     return FileResponse(str(index))
-
-@app.get("/health")
-async def health():
-    return {"status": "ok", "service": "NoticeSense API"}

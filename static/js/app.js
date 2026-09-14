@@ -3,7 +3,7 @@
    Handles: routing, file upload, agent results rendering, chat
    ================================================================ */
 
-const API = '';               // same origin as FastAPI
+const API = (window.NOTICESENSE_API_URL || '').replace(/\/$/, '');
 let SESSION_ID = sessionStorage.getItem('ns_session') || null;
 let SESSION_DATA = JSON.parse(sessionStorage.getItem('ns_data') || 'null');
 let chatHistory  = [];

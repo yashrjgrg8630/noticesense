@@ -80,15 +80,27 @@ def _generate_gemini(system_prompt: str, user_prompt: str, retries: int = 3) -> 
 
 def _generate_ollama(system_prompt: str, user_prompt: str) -> str:
     """Calls a local model via Ollama using chat messages."""
-    import ollama
-    response = ollama.chat(
-        model=settings.OLLAMA_MODEL,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user",   "content": user_prompt},
-        ],
-    )
-    return response["message"]["content"].strip()
+    try:
+        import ollama
+    except ImportError as exc:
+        raise RuntimeError(
+            "Ollama is selected but the ollama Python package is unavailable."
+        ) from exc
+
+    try:
+        client = ollama.Client(host=settings.OLLAMA_BASE_URL)
+        response = client.chat(
+            model=settings.OLLAMA_MODEL,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user",   "content": user_prompt},
+            ],
+        )
+        return response["message"]["content"].strip()
+    except Exception as exc:
+        raise RuntimeError(
+            f"Ollama is unavailable at {settings.OLLAMA_BASE_URL}: {exc}"
+        ) from exc
 
 
 # ===========================================================================

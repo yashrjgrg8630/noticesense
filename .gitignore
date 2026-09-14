@@ -26,3 +26,5 @@ data/uploads/*
 # Other
 *.pdf
 .poppler/
+dist/
+node_modules/

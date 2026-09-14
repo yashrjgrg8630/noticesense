@@ -49,9 +49,19 @@ async def chat(req: ChatRequest):
     backend = settings.LLM_BACKEND.lower()
 
     if backend == "ollama":
-        import ollama
-        response = ollama.chat(model=settings.OLLAMA_MODEL, messages=messages)
-        reply = response["message"]["content"].strip()
+        try:
+            import ollama
+            client = ollama.Client(host=settings.OLLAMA_BASE_URL)
+            response = client.chat(model=settings.OLLAMA_MODEL, messages=messages)
+            reply = response["message"]["content"].strip()
+        except ImportError as exc:
+            raise RuntimeError(
+                "Ollama is selected but the ollama Python package is unavailable."
+            ) from exc
+        except Exception as exc:
+            raise RuntimeError(
+                f"Ollama is unavailable at {settings.OLLAMA_BASE_URL}: {exc}"
+            ) from exc
     else:
         from google import genai
         from google.genai import types

@@ -4,8 +4,10 @@ from PIL import Image
 from pdf2image import convert_from_path
 from backend.core.config import settings
 
-# Configure Tesseract path from settings
-pytesseract.pytesseract.tesseract_cmd = settings.TESSERACT_CMD
+# Configure Tesseract when an explicit executable path is provided. Otherwise,
+# pytesseract resolves tesseract from PATH inside the deployment environment.
+if settings.TESSERACT_CMD:
+    pytesseract.pytesseract.tesseract_cmd = settings.TESSERACT_CMD
 
 def extract_text_from_image(image_path: str) -> str:
     """
@@ -24,8 +26,10 @@ def extract_text_from_pdf(pdf_path: str) -> str:
     then running OCR on each image.
     """
     try:
-        # Note: poppler_path is required on Windows
-        images = convert_from_path(pdf_path, poppler_path=settings.POPPLER_PATH)
+        conversion_options = {}
+        if settings.POPPLER_PATH:
+            conversion_options["poppler_path"] = settings.POPPLER_PATH
+        images = convert_from_path(pdf_path, **conversion_options)
         full_text = ""
         
         for i, image in enumerate(images):
